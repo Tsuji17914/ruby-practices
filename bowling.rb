@@ -13,7 +13,7 @@ end
 point = 0
 i = 0
 
-10.times.sum do |f|
+10.times.sum do
   if shots[i] == 10
     point += 10 + shots[(i + 1)..(i + 2)].sum
     i += 1
