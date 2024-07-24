@@ -14,16 +14,16 @@ i = 0
 
 point = 10.times.sum do
   if shots[i] == 10
-    frame =  10 + shots[i + 1] + shots[i + 2]
+    frame_score = 10 + shots[i + 1] + shots[i + 2]
     i += 1
   elsif shots[i] + shots[i + 1] == 10
-    frame = 10 + shots[i + 2]
+    frame_score = 10 + shots[i + 2]
     i += 2
   else
-    frame = shots[i] + shots[i + 1]
+    frame_score = shots[i] + shots[i + 1]
     i += 2
   end
-  frame
+  frame_score
 end
 
 puts point
