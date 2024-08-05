@@ -19,7 +19,9 @@ def format_columns(contents)
 end
 
 def display_contents(transposed_contents)
-  transposed_contents.each { |line| puts line.join(' ') }
+  transposed_contents.each do |line|
+    puts line.map { |item| item.ljust(30) }.join(' ')
+  end
 end
 
 current_directory = list_directories
