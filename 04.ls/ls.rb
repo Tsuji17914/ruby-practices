@@ -5,9 +5,9 @@ def list_directories
   Dir.entries('.').sort
 end
 
-COLUMNS = 3.0
+COLUMNS = 3
 def slice_contents(current_directory, columns)
-  contents = current_directory.each_slice((current_directory.size / columns).ceil).to_a
+  contents = current_directory.each_slice(current_directory.size.ceildiv(columns)).to_a
 end
 
 def format_columns(contents)
