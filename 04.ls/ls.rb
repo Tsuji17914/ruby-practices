@@ -7,7 +7,7 @@ end
 
 COLUMNS = 3
 def slice_contents(current_directory, columns)
-  contents = current_directory.each_slice(current_directory.size.ceildiv(columns)).to_a
+  current_directory.each_slice(current_directory.size.ceildiv(columns)).to_a
 end
 
 def format_columns(contents)
@@ -19,8 +19,10 @@ def format_columns(contents)
 end
 
 def display_contents(transposed_contents)
+  max_length = transposed_contents.flatten.map {|item| item.length }.max
+
   transposed_contents.each do |line|
-    puts line.map { |item| item.ljust(30) }.join(' ')
+    puts line.map { |item| item.ljust(max_length + 2) }.join
   end
 end
 
