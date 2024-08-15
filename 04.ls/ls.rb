@@ -1,11 +1,12 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+COLUMNS = 3
+
 def list_directories
-  Dir.entries('.').sort
+  Dir.entries('.').filter { |f| !f.start_with?('.')}.sort
 end
 
-COLUMNS = 3
 def slice_contents(current_directory, columns)
   current_directory.each_slice(current_directory.size.ceildiv(columns)).to_a
 end
