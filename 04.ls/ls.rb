@@ -4,11 +4,16 @@
 COLUMNS = 3
 
 def list_directories
-  Dir.entries('.').filter { |f| !f.start_with?('.')}.sort
+  Dir.entries('.').reject { |f| f.start_with?('.') }.sort
 end
 
 def slice_contents(current_directory, columns)
-  current_directory.each_slice(current_directory.size.ceildiv(columns)).to_a
+  slice_size = if current_directory.empty?
+                 1
+               else
+                 current_directory.size.ceildiv(columns)
+               end
+  current_directory.each_slice(slice_size).to_a
 end
 
 def format_columns(contents)
@@ -20,7 +25,7 @@ def format_columns(contents)
 end
 
 def display_contents(transposed_contents)
-  max_length = transposed_contents.flatten.map {|item| item.length }.max
+  max_length = transposed_contents.flatten.map(&:length).max
 
   transposed_contents.each do |line|
     puts line.map { |item| item.ljust(max_length + 2) }.join
