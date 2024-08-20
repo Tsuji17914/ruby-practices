@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 COLUMNS = 3
+PADDING = 2
 
 def list_directories
   Dir.entries('.').reject { |f| f.start_with?('.') }.sort
@@ -28,7 +29,7 @@ def display_contents(transposed_contents)
   max_length = transposed_contents.flatten.map(&:length).max
 
   transposed_contents.each do |line|
-    puts line.map { |item| item.ljust(max_length + 2) }.join
+    puts line.map { |item| item.ljust(max_length + PADDING) }.join
   end
 end
 
