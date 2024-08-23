@@ -7,12 +7,9 @@ COLUMNS = 3
 PADDING = 2
 
 def list_directories(show_all)
-  entries = Dir.entries('.')
-  if show_all
-    entries.sort
-  else
-    entries.reject { |f| f.start_with?('.') }.sort
-  end
+  entries = Dir.entries('.').sort
+  entries.reject! { |f| f.start_with?('.') } unless show_all
+  entries
 end
 
 def slice_contents(current_directory, columns)
