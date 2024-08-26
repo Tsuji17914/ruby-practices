@@ -1,11 +1,15 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'optparse'
+
 COLUMNS = 3
 PADDING = 2
 
-def list_directories
-  Dir.entries('.').reject { |f| f.start_with?('.') }.sort
+def list_directories(show_all)
+  entries = Dir.entries('.').sort
+  entries.reject! { |f| f.start_with?('.') } unless show_all
+  entries
 end
 
 def slice_contents(current_directory, columns)
@@ -33,7 +37,12 @@ def display_contents(transposed_contents)
   end
 end
 
-current_directory = list_directories
+opt = OptionParser.new
+options = {}
+opt.on('-a') { options[:show_all] = true }
+opt.parse!(ARGV)
+
+current_directory = list_directories(options[:show_all])
 contents = slice_contents(current_directory, COLUMNS)
 formatted_contents = format_columns(contents)
 transposed_contents = formatted_contents.transpose
