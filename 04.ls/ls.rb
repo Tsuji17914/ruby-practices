@@ -2,14 +2,53 @@
 # frozen_string_literal: true
 
 require 'optparse'
+require 'etc'
 
 COLUMNS = 3
 PADDING = 2
 
-def list_directories(reverse)
+def permission_string(allow)
+  allow.chars.map do |i|
+    case i.to_i
+    when 7
+      'rwx'
+    when 6
+      'rw-'
+    when 5
+      'r-x'
+    when 4
+      'r--'
+    when 3
+      '-wx'
+    when 2
+      '-w-'
+    when 1
+      '--x'
+    else
+      '---'
+    end
+  end.join
+end
+
+def list_directories(permit)
   entries = Dir.entries('.').sort
   entries.reject! { |f| f.start_with?('.') }
-  reverse ? entries.reverse : entries
+  if permit
+    entries.each do |filename|
+      file_stat = File.stat(filename)
+      file_type = file_stat.ftype.slice(0)
+      permission = file_stat.mode.to_s(8).slice(-3, 3)
+      permission_str = permission_string(permission)
+      hard_link = file_stat.nlink
+      owner = Etc.getpwuid(file_stat.uid).name
+      group_owner = Etc.getgrgid(file_stat.gid).name
+      block_size = file_stat.size.to_s.rjust(4)
+      last_update_time = file_stat.mtime.strftime('%_m %_d %H:%M')
+      puts "#{file_type}#{permission_str}@ #{hard_link} #{owner} #{group_owner} #{block_size} #{last_update_time} #{filename}"
+    end
+  else
+    entries
+  end
 end
 
 def slice_contents(current_directory, columns)
@@ -39,12 +78,14 @@ end
 
 opt = OptionParser.new
 options = {}
-opt.on('-r') { options[:reverse] = true }
+opt.on('-l') { options[:permit] = true }
 opt.parse!(ARGV)
 
-current_directory = list_directories(options[:reverse])
-contents = slice_contents(current_directory, COLUMNS)
-formatted_contents = format_columns(contents)
-transposed_contents = formatted_contents.transpose
+current_directory = list_directories(options[:permit])
+unless options[:permit]
+  contents = slice_contents(current_directory, COLUMNS)
+  formatted_contents = format_columns(contents)
+  transposed_contents = formatted_contents.transpose
 
-display_contents(transposed_contents)
+  display_contents(transposed_contents)
+end
