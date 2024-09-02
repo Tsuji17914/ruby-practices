@@ -30,6 +30,18 @@ def permission_string(allow)
   end.join
 end
 
+def file_attributes(file_path)
+  if `xattr #{file_path}`.empty?
+    if `getfacl #{file_path}`.empty?
+      ' '
+    else
+      '+'
+    end
+  else
+    '@'
+  end
+end
+
 def list_directories(permit)
   entries = Dir.entries('.').sort
   entries.reject! { |f| f.start_with?('.') }
@@ -39,12 +51,13 @@ def list_directories(permit)
       file_type = file_stat.ftype.slice(0)
       permission = file_stat.mode.to_s(8).slice(-3, 3)
       permission_str = permission_string(permission)
+      attributes = file_attributes(filename)
       hard_link = file_stat.nlink
       owner = Etc.getpwuid(file_stat.uid).name
       group_owner = Etc.getgrgid(file_stat.gid).name
       block_size = file_stat.size.to_s.rjust(4)
       last_update_time = file_stat.mtime.strftime('%_m %_d %H:%M')
-      puts "#{file_type}#{permission_str}@ #{hard_link} #{owner} #{group_owner} #{block_size} #{last_update_time} #{filename}"
+      puts "#{file_type}#{permission_str}#{attributes} #{hard_link} #{owner} #{group_owner} #{block_size} #{last_update_time} #{filename}"
     end
   else
     entries
