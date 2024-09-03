@@ -8,56 +8,34 @@ COLUMNS = 3
 PADDING = 2
 
 def permission_string(allow)
-  allow.chars.map do |i|
-    case i.to_i
-    when 7
-      'rwx'
-    when 6
-      'rw-'
-    when 5
-      'r-x'
-    when 4
-      'r--'
-    when 3
-      '-wx'
-    when 2
-      '-w-'
-    when 1
-      '--x'
-    else
-      '---'
-    end
-  end.join
+  permission_map = {
+    7 => 'rwx',
+    6 => 'rw-',
+    5 => 'r-x',
+    4 => 'r--',
+    3 => '-wx',
+    2 => '-w-',
+    1 => '--x'
+  }
+
+  allow.chars.map { |i| permission_map[i.to_i] || '---' }.join
 end
 
-def file_attributes(file_path)
-  if `xattr #{file_path}`.empty?
-    if `getfacl #{file_path}`.empty?
-      ' '
-    else
-      '+'
-    end
-  else
-    '@'
-  end
-end
-
-def list_directories(permit)
+def list_directories(long_format)
   entries = Dir.entries('.').sort
   entries.reject! { |f| f.start_with?('.') }
-  if permit
+  if long_format
     entries.each do |filename|
       file_stat = File.stat(filename)
       file_type = file_stat.ftype.slice(0)
       permission = file_stat.mode.to_s(8).slice(-3, 3)
       permission_str = permission_string(permission)
-      attributes = file_attributes(filename)
       hard_link = file_stat.nlink
       owner = Etc.getpwuid(file_stat.uid).name
       group_owner = Etc.getgrgid(file_stat.gid).name
       block_size = file_stat.size.to_s.rjust(4)
       last_update_time = file_stat.mtime.strftime('%_m %_d %H:%M')
-      puts "#{file_type}#{permission_str}#{attributes} #{hard_link} #{owner} #{group_owner} #{block_size} #{last_update_time} #{filename}"
+      puts "#{file_type}#{permission_str} #{hard_link} #{owner} #{group_owner} #{block_size} #{last_update_time} #{filename}"
     end
   else
     entries
@@ -91,11 +69,11 @@ end
 
 opt = OptionParser.new
 options = {}
-opt.on('-l') { options[:permit] = true }
+opt.on('-l') { options[:long_format] = true }
 opt.parse!(ARGV)
 
-current_directory = list_directories(options[:permit])
-unless options[:permit]
+current_directory = list_directories(options[:long_format])
+unless options[:long_format]
   contents = slice_contents(current_directory, COLUMNS)
   formatted_contents = format_columns(contents)
   transposed_contents = formatted_contents.transpose
