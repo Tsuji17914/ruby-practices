@@ -6,19 +6,18 @@ require 'etc'
 
 COLUMNS = 3
 PADDING = 2
+PERMISSION_MAP = {
+  7 => 'rwx',
+  6 => 'rw-',
+  5 => 'r-x',
+  4 => 'r--',
+  3 => '-wx',
+  2 => '-w-',
+  1 => '--x'
+}.freeze
 
 def permission_string(allow)
-  permission_map = {
-    7 => 'rwx',
-    6 => 'rw-',
-    5 => 'r-x',
-    4 => 'r--',
-    3 => '-wx',
-    2 => '-w-',
-    1 => '--x'
-  }
-
-  allow.chars.map { |i| permission_map[i.to_i] || '---' }.join
+  allow.chars.map { |i| PERMISSION_MAP[i.to_i] || '---' }.join
 end
 
 def list_directories(long_format)
