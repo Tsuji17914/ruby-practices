@@ -16,6 +16,16 @@ PERMISSION_MAP = {
   1 => '--x'
 }.freeze
 
+FILE_TYPE_MAP = {
+  'file' => '-',
+  'directory' => 'd',
+  'fifo' => 'p',
+  'characterSpecial' => 'c',
+  'blockSpecial' => 'b',
+  'link' => 'l',
+  'socket' => 's'
+}.freeze
+
 def permission_string(allow)
   allow.chars.map { |i| PERMISSION_MAP[i.to_i] || '---' }.join
 end
@@ -26,7 +36,7 @@ def list_directories(long_format)
   if long_format
     entries.each do |filename|
       file_stat = File.stat(filename)
-      file_type = file_stat.ftype.slice(0)
+      file_type = FILE_TYPE_MAP[File.ftype(filename)] || '?'
       permission = file_stat.mode.to_s(8).slice(-3, 3)
       permission_str = permission_string(permission)
       hard_link = file_stat.nlink
