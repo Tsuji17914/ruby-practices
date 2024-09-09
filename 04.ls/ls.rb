@@ -8,48 +8,48 @@ COLUMNS = 3
 PADDING = 2
 
 PERMISSION_MAP = {
-   7 => 'rwx',
-   6 => 'rw-',
-   5 => 'r-x',
-   4 => 'r--',
-   3 => '-wx',
-   2 => '-w-',
-   1 => '--x'
- }.freeze
+  7 => 'rwx',
+  6 => 'rw-',
+  5 => 'r-x',
+  4 => 'r--',
+  3 => '-wx',
+  2 => '-w-',
+  1 => '--x'
+}.freeze
 
- FILE_TYPE_MAP = {
-   'file' => '-',
-   'directory' => 'd',
-   'fifo' => 'p',
-   'characterSpecial' => 'c',
-   'blockSpecial' => 'b',
-   'link' => 'l',
-   'socket' => 's'
- }.freeze
+FILE_TYPE_MAP = {
+  'file' => '-',
+  'directory' => 'd',
+  'fifo' => 'p',
+  'characterSpecial' => 'c',
+  'blockSpecial' => 'b',
+  'link' => 'l',
+  'socket' => 's'
+}.freeze
 
- def permission_string(allow)
+def permission_string(allow)
   allow.chars.map { |i| PERMISSION_MAP[i.to_i] || '---' }.join
 end
 
-def list_directories(show_all,reverse,long_format)
+def get_files(show_all, reverse)
   entries = Dir.entries('.').sort
   entries.reject! { |f| f.start_with?('.') } unless show_all
   entries.reverse! if reverse
-  if long_format
-    entries.each do |filename|
-      file_stat = File.stat(filename)
-      file_type = FILE_TYPE_MAP[File.ftype(filename)] || '?'
-      permission = file_stat.mode.to_s(8).slice(-3, 3)
-      permission_str = permission_string(permission)
-      hard_link = file_stat.nlink
-      owner = Etc.getpwuid(file_stat.uid).name
-      group_owner = Etc.getgrgid(file_stat.gid).name
-      block_size = file_stat.size.to_s.rjust(4)
-      last_update_time = file_stat.mtime.strftime('%_m %_d %H:%M')
-      puts "#{file_type}#{permission_str} #{hard_link} #{owner} #{group_owner} #{block_size} #{last_update_time} #{filename}"
-    end
-  else
-    entries
+  entries
+end
+
+def format_long(files)
+  files.each do |filename|
+    file_stat = File.stat(filename)
+    file_type = FILE_TYPE_MAP[File.ftype(filename)] || '?'
+    permission = file_stat.mode.to_s(8).slice(-3, 3)
+    permission_str = permission_string(permission)
+    hard_link = file_stat.nlink
+    owner = Etc.getpwuid(file_stat.uid).name
+    group_owner = Etc.getgrgid(file_stat.gid).name
+    block_size = file_stat.size.to_s.rjust(4)
+    last_update_time = file_stat.mtime.strftime('%_m %_d %H:%M')
+    puts "#{file_type}#{permission_str} #{hard_link} #{owner} #{group_owner} #{block_size} #{last_update_time} #{filename}"
   end
 end
 
@@ -85,8 +85,10 @@ opt.on('-r') { options[:reverse] = true }
 opt.on('-l') { options[:long_format] = true }
 opt.parse!(ARGV)
 
-current_directory = list_directories(options[:show_all], options[:reverse],options[:long_format])
-unless options[:long_format]
+current_directory = get_files(options[:show_all], options[:reverse])
+if options[:long_format]
+  format_long(current_directory)
+else
   contents = slice_contents(current_directory, COLUMNS)
   formatted_contents = format_columns(contents)
   transposed_contents = formatted_contents.transpose
