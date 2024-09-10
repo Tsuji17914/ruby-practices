@@ -89,9 +89,9 @@ entries_list = filtered_entries(options[:show_all], options[:reverse])
 if options[:long_format]
   display_in_long_format(entries_list)
 else
-  contents = slice_contents(current_directory, COLUMNS)
+  contents = slice_contents(entries_list, COLUMNS)
   formatted_contents = format_columns(contents)
   transposed_contents = formatted_contents.transpose
 
-  display_contents(transposed_contents)
+  display_in_normal_format(transposed_contents)
 end
