@@ -31,14 +31,14 @@ def permission_string(allow)
   allow.chars.map { |i| PERMISSION_MAP[i.to_i] || '---' }.join
 end
 
-def get_files(show_all, reverse)
+def filtered_entries(show_all, reverse)
   entries = Dir.entries('.').sort
   entries.reject! { |f| f.start_with?('.') } unless show_all
   entries.reverse! if reverse
   entries
 end
 
-def format_long(files)
+def display_in_long_format(files)
   files.each do |filename|
     file_stat = File.stat(filename)
     file_type = FILE_TYPE_MAP[File.ftype(filename)] || '?'
@@ -70,7 +70,7 @@ def format_columns(contents)
   contents
 end
 
-def display_contents(transposed_contents)
+def display_in_normal_format(transposed_contents)
   max_length = transposed_contents.flatten.map(&:length).max
 
   transposed_contents.each do |line|
@@ -85,9 +85,9 @@ opt.on('-r') { options[:reverse] = true }
 opt.on('-l') { options[:long_format] = true }
 opt.parse!(ARGV)
 
-current_directory = get_files(options[:show_all], options[:reverse])
+entries_list = filtered_entries(options[:show_all], options[:reverse])
 if options[:long_format]
-  format_long(current_directory)
+  display_in_long_format(entries_list)
 else
   contents = slice_contents(current_directory, COLUMNS)
   formatted_contents = format_columns(contents)
