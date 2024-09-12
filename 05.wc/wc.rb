@@ -18,32 +18,32 @@ def number_of_words(text)
   text.split.size
 end
 
-def size_of_byte(text)
+def byte_size(text)
   text.bytesize
 end
 
-def process_text(text, options)
+def output_process(text, options)
   result = []
   if options.empty?
     result << number_of_lines(text)
     result << number_of_words(text)
-    result << size_of_byte(text)
+    result << byte_size(text)
   else
     result << number_of_lines(text) if options[:lines]
     result << number_of_words(text) if options[:words]
-    result << size_of_byte(text) if options[:bytes]
+    result << byte_size(text) if options[:bytes]
   end
-  result.join(' ')
+  result.map { |item| item.to_s.rjust(8) }.join(' ')
 end
 
 if ARGV.empty?
   input_text = $stdin.read
-  puts "#{number_of_lines(input_text)} #{number_of_words(input_text)} #{size_of_byte(input_text)}"
+  puts output_process(input_text, options)
 else
   ARGV.each do |file_name|
     if File.exist?(file_name)
       file_content = File.read(file_name)
-      puts "#{process_text(file_content, options)} #{file_name}"
+      puts "#{output_process(file_content, options)} #{file_name}"
     else
       puts "ファイルが見つかりません：#{file_name}"
     end
