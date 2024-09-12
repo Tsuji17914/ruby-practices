@@ -47,7 +47,7 @@ def display_in_long_format(files)
     hard_link = file_stat.nlink
     owner = Etc.getpwuid(file_stat.uid).name
     group_owner = Etc.getgrgid(file_stat.gid).name
-    block_size = file_stat.size.to_s.rjust(4)
+    block_size = file_stat.size.to_s.rjust(7)
     last_update_time = file_stat.mtime.strftime('%_m %_d %H:%M')
     puts "#{file_type}#{permission_str} #{hard_link} #{owner} #{group_owner} #{block_size} #{last_update_time} #{filename}"
   end
