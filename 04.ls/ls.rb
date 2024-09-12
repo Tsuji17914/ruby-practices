@@ -39,6 +39,8 @@ def filtered_entries(show_all, reverse)
 end
 
 def display_in_long_format(files)
+  total_blocks = calculate_total_blocks(files)
+  puts "total #{total_blocks}"
   files.each do |filename|
     file_stat = File.stat(filename)
     file_type = FILE_TYPE_MAP[File.ftype(filename)] || '?'
@@ -47,10 +49,19 @@ def display_in_long_format(files)
     hard_link = file_stat.nlink
     owner = Etc.getpwuid(file_stat.uid).name
     group_owner = Etc.getgrgid(file_stat.gid).name
-    block_size = file_stat.size.to_s.rjust(4)
+    block_size = file_stat.size.to_s.rjust(7)
     last_update_time = file_stat.mtime.strftime('%_m %_d %H:%M')
     puts "#{file_type}#{permission_str} #{hard_link} #{owner} #{group_owner} #{block_size} #{last_update_time} #{filename}"
   end
+end
+
+def calculate_total_blocks(files)
+  total_blocks = 0
+  files.each do |filename|
+    file_stat = File.stat(filename)
+    total_blocks += file_stat.blocks
+  end
+  total_blocks
 end
 
 def slice_contents(current_directory, columns)
